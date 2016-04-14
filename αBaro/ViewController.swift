@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class IntroViewController: UIViewController {
+class ViewController: UIViewController {
     
     var newResponse = UILabel()
     var coolResponse = UILabel()
@@ -33,10 +33,10 @@ class IntroViewController: UIViewController {
             self.startButton.alpha -= 1.0
             }, completion: nil)
         
-//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue(), {
-//            self.performSegueWithIdentifier("BackToMain", sender: self)
-//        })
-//        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+            self.performSegueWithIdentifier("mainView", sender: self)
+        })
+        
         
     }
     
