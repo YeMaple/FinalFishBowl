@@ -7,72 +7,29 @@
 //
 
 import UIKit
-import MessageUI
 
-class SettingsTableTableViewController: UITableViewController, MFMailComposeViewControllerDelegate {
+class SettingsTableTableViewController: UITableViewController {
     
-    @IBOutlet weak var nameTextField: UITextField!
 
-    @IBOutlet weak var feedBackButton: UITableViewCell!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        //self.view.layer.cornerRadius = 7
+        //self.view.clipsToBounds = true
+        //self.view.backgroundColor = UIColor.blackColor()
+   
         
         
+
+        
+        // Uncomment the following line to preserve selection between presentations
+        // self.clearsSelectionOnViewWillAppear = false
+
+        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
 
 
-    
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
-        if indexPath.section == 0 && indexPath.row == 1 {
-            //start new Xiguan
-            startNewXiguan()
-            
-        }else if (indexPath.section == 1 && indexPath.row == 0) {
-            //feedback
-            let fbmailCV = FeedbackMFMailComposeViewController()
-            if(MFMailComposeViewController.canSendMail()){
-                
-                fbmailCV.mailComposeDelegate = self
-                fbmailCV.setToRecipients(["youshua@yahoo.com"])
-                fbmailCV.setSubject("APP Feedback")
-                fbmailCV.setMessageBody("Hi teams\n", isHTML: false)
-                
-                self.presentViewController(fbmailCV, animated: true, completion: nil)
-                
-                //fbmailCV.presentViewController(fbmailCV, animated: true, completion: nil)
-            }else{
-                print("FAFA\n")
-            }
-        }else if (indexPath.section == 1 && indexPath.row == 2){
-            let url = NSURL(string: "https://www.baidu.com")
-            UIApplication.sharedApplication().openURL(url!)
-        }
-        
-    }
-    
-    
-    func FeedbackMFMailComposeViewController() -> MFMailComposeViewController {
-        let feedbackM = MFMailComposeViewController()
-        feedbackM.mailComposeDelegate = self
-        feedbackM.setToRecipients(["youshua@yahoo.com"])
-        feedbackM.setSubject("APP Feedback")
-        feedbackM.setMessageBody("Hi teams\n", isHTML: false)
-        
-        return feedbackM
-    }
-    
-    
-    
-    
-    func startNewXiguan() {
-        
-        //BOBOBOBOBOBOBOBOBO
-        
-    }
-    
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

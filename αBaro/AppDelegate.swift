@@ -13,7 +13,6 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var storyboard = UIStoryboard(name: "Main", bundle: NSBundle.mainBundle())
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
@@ -64,11 +63,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let mySettings: UIUserNotificationSettings = UIUserNotificationSettings(forTypes: [.Alert, .Badge], categories: categories as? Set<UIUserNotificationCategory>)
         
         UIApplication.sharedApplication().registerUserNotificationSettings(mySettings)
-        
-        if !FirstLoginCheck.isSignedIn() {
-            window?.rootViewController = storyboard.instantiateViewControllerWithIdentifier("IntroViewController") as! IntroViewController
-        }
-        
         return true
     }
 

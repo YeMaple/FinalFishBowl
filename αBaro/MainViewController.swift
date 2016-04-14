@@ -20,8 +20,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var bkgImage: UIImageView!
     @IBOutlet weak var ringImage: UIImageView!
     @IBOutlet weak var Dimmer: UIImageView!
-    
-    @IBOutlet weak var timerLabel: UILabel!
+    @IBOutlet weak var NiceTalk: UILabel!
     @IBOutlet weak var R2Image: UIButton!
     
     
@@ -29,15 +28,13 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     var flipped = false
     var first = true
     var theView = UIViewController!()
-    var counter = 0
-    var timer = NSTimer()
     
-    var introInfo = [LocalData]()
+    
     
     var event = [NSManagedObject]()
     
     var myPercent = 0
-    var percentage = 42
+    var percentage = 40
     var animated = false
     
     // Animation related stuff
@@ -54,7 +51,11 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         self.view.layer.cornerRadius = 7
         self.view.clipsToBounds = true
         
-       
+        let swipeGesture = UISwipeGestureRecognizer(target: self, action: Selector("handleSwipes:"))
+        swipeGesture.numberOfTouchesRequired = 1
+        swipeGesture.direction = .Up
+        view.addGestureRecognizer(swipeGesture)
+
         
         NSThread.sleepForTimeInterval(1.0)
         // get todayWidget shared info path
@@ -62,16 +63,24 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         
         super.viewDidLoad()
         
+        // test coredata works
+        //newData(percentage)
+        //fetchDays()
         
+        //percentage++
         
+        //UpdateDays(percentage)
+        //fetchData()
+        
+        //deleteData()
+        
+        //fetchData()
 
         
         // bkg calibrate
         self.bkgImage.frame.size.height = view.frame.size.height + 3.0
         self.bkgImage.frame.size.width = view.frame.size.width + 2.0
         self.bkgImage.center.y -= 2
-        
-        timerLabel.text = "00:00"
         
         //Set baseImage
         //let baseImageString = String(self.percentage / 10 * 10)
@@ -135,36 +144,13 @@ class MainViewController: UIViewController, UITextFieldDelegate {
             }, completion:nil )
         
         
-        //local data test
-        var dummy = LocalData(name: "bobo", coinNumber: 10, currentMission: "knife")
         
-        introInfo.append(dummy!)
-        
-        introSave()
-        
-        var savedInfo = loadIntroInfo()
-        print(savedInfo?.first!.name)
     
-        FirstLoginCheck.signIn()
         
         // Do any additional setup after loading the view.
     }
     
-    
-    func introSave() {
-        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(introInfo, toFile: LocalData.ArchiveURL.path!)
-        if !isSuccessfulSave {
-            print("Failed to save meals...")
-        }
-    }
 
-    
-    func loadIntroInfo() -> [LocalData]? {
-        
-        return NSKeyedUnarchiver.unarchiveObjectWithFile(LocalData.ArchiveURL.path!) as? [LocalData]
-        
-    }
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -189,7 +175,10 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         }
         
         
-       
+        UIView.animateWithDuration(2.0, delay: 3.0,  options: [ .CurveEaseInOut, .Repeat,], animations: {
+            self.arrowImage.center.y -= 10
+            self.arrowImage.alpha -= 1.0
+            }, completion:nil )
         
 
     }
@@ -298,7 +287,6 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     @IBAction func BallHited(sender: AnyObject) {
         
         
-        
         if(flipped == false){
         
         UIView.animateWithDuration(0.125, delay: 0.0,  options: [ .CurveEaseInOut ], animations: {
@@ -311,15 +299,9 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         UIView.animateWithDuration(0.25, delay: 0.0, usingSpringWithDamping: 0.9, initialSpringVelocity: 0.9 ,  options: [ .CurveEaseInOut ], animations: {
             self.baseImage.setBackgroundImage(UIImage(named: "DefaultBase"), forState: .Normal)
             self.baseImage.transform = CGAffineTransformMakeScale(-1, 1)
-            self.timerLabel.transform = CGAffineTransformMakeScale(1, 1)
-            self.timerLabel.alpha += 1.0
+            self.NiceTalk.transform = CGAffineTransformMakeScale(1, 1)
+            self.NiceTalk.alpha += 1.0
             }, completion:nil )
-            
-            
-            timer.invalidate()
-            
-            timer = NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerAction", userInfo: nil, repeats: true)
-            
             
             flipped = true
             
@@ -337,23 +319,15 @@ class MainViewController: UIViewController, UITextFieldDelegate {
             UIView.animateWithDuration(0.25, delay: 0.0, usingSpringWithDamping: 0.9, initialSpringVelocity: 0.9 , options: [ .CurveEaseInOut ] , animations: {
                 self.baseImage.setBackgroundImage(UIImage(named: "TankBase"), forState: .Normal)
                 self.baseImage.transform = CGAffineTransformMakeScale(1, 1)
-                self.timerLabel.transform = CGAffineTransformMakeScale(-1, 1)
-                self.timerLabel.alpha -= 1.0
+                self.NiceTalk.transform = CGAffineTransformMakeScale(-1, 1)
+                self.NiceTalk.alpha -= 1.0
                 }, completion:nil )
-            
-            timer.invalidate()
             
             flipped = false
         
         
         
         }
-
-    }
-    
-    func timerAction() {
-        ++counter
-        timerLabel.text = String(format:"%02d:%02d", (counter/60)%60, counter%60)
         
     }
     
@@ -365,8 +339,8 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     }
 
 
-    
-    func saveName(name: String) {
+    // create a new coreData element
+    func newData(name: String, continueDays: Int, success: Bool) {
         //1
         let appDelegate =
         UIApplication.sharedApplication().delegate as! AppDelegate
@@ -374,25 +348,75 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         let managedContext = appDelegate.managedObjectContext
         
         //2
-        let entity =  NSEntityDescription.entityForName("Entity",inManagedObjectContext:managedContext!)
+        let entity =  NSEntityDescription.entityForName("Day",inManagedObjectContext:managedContext!)
         
-        let person = NSManagedObject(entity: entity!,
+        let day = NSManagedObject(entity: entity!,
             insertIntoManagedObjectContext: managedContext)
         
         //3
-        person.setValue(name, forKey: "name")
+        day.setValue(name, forKey: "name")
+        day.setValue(continueDays, forKey: "continueDays")
+        day.setValue(false, forKey: "success")
         
         //4
         do {
             try managedContext!.save()
             print("saved!")
             //5
-            event.append(person)
+            event.append(day)
         } catch let error as NSError  {
             print("Could not save \(error), \(error.userInfo)")
         }
     }
     
+    // fetch the coreData and do sth
+    func fetchLastData(){
+        //1
+        let appDelegate =
+        UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        let managedContext = appDelegate.managedObjectContext
+        
+        //2
+        let fetchRequest = NSFetchRequest(entityName: "Day")
+        
+        //3
+        do {
+            let results =
+            try managedContext!.executeFetchRequest(fetchRequest)
+            //print(results.count)
+            for res in results{
+                print(res.valueForKey("continueDays") as! Int)
+            }
+            //print(results[6].valueForKey("continueDays") as! Int)
+            //print(results)
+        } catch let error as NSError {
+            print("Could not fetch \(error), \(error.userInfo)")
+        }
+    }
+    
+    // Delete the whole coreData Storage
+    func deleteAllData(){
+        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = appDel.managedObjectContext!
+        let request = NSFetchRequest(entityName: "Day")
+        request.includesPropertyValues = false
+        
+        do {
+            let incidents = try context.executeFetchRequest(request)
+            
+            if incidents.count > 0 {
+                
+                for result: AnyObject in incidents{
+                    context.deleteObject(result as! NSManagedObject)
+                    print("NSManagedObject has been Deleted")
+                }
+                try context.save() }
+        }
+        catch let error as NSError {
+            debugPrint(error)
+        }
+    }
     
     // @IBAction func shareButton
     
@@ -450,6 +474,15 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         
     }
     
+    func handleSwipes(sender:UISwipeGestureRecognizer){
+        
+        let myBoard = UIStoryboard(name: "Main", bundle: nil)
+        theView = myBoard.instantiateViewControllerWithIdentifier("complexVC")
+        theView.modalTransitionStyle = .CoverVertical
+        theView.view.backgroundColor = UIColor.clearColor()
+        theView.modalPresentationStyle = UIModalPresentationStyle.OverCurrentContext
+        presentViewController(theView, animated: true, completion: nil)
+    }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
         self.view.endEditing(true)
